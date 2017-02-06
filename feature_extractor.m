@@ -1,4 +1,4 @@
-function [data, groups] = feature_extractor( file )
+function [features] = feature_extractor( file )
 %extract lbp features for an image containing a face
 %   file: the location of the .hdf5 file
 
@@ -104,9 +104,9 @@ function [data, groups] = feature_extractor( file )
 
     % transform points to new scale
     c1 = c1 .* [rx ry];
-    c2 = c2 .* [rx ry];
-    mc = mc .* [rx ry];
-    c3 = c3 .* [rx ry];
+%     c2 = c2 .* [rx ry];
+%     mc = mc .* [rx ry];
+%     c3 = c3 .* [rx ry];
 
     % resize image
     dim = size(face);
@@ -123,10 +123,10 @@ function [data, groups] = feature_extractor( file )
     ym = c1(2) - 48;
 
     % transform the points to new space
-    c1 = c1 - [xm ym];
-    c2 = c2 - [xm ym];
-    mc = mc - [xm ym];
-    c3 = c3 - [xm ym];
+%     c1 = c1 - [xm ym];
+%     c2 = c2 - [xm ym];
+%     mc = mc - [xm ym];
+%     c3 = c3 - [xm ym];
     
     % crop to 128x128
     rect = [xm ym 128 128];
@@ -150,32 +150,6 @@ function [data, groups] = feature_extractor( file )
 %     f=figure;
 %     stem(features,'.');
 %     close(f);
-
-    %% save features data
-
-    try
-        load('data.mat');
-    catch
-        data = [];
-    end
-
-    data = [data; features];
-    save('data.mat','data');
-
-    %% save grouping of data
-
-    try
-        load('groups.mat');
-    catch
-        groups = [];
-    end
-
-%     close(f);
-    options = ['real';'mask'];
-    choice = menu('category','real','mask');
-
-    groups = [groups; options(choice,:)];
-    save('groups.mat','groups');
 
 end
 
