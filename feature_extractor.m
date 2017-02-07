@@ -26,7 +26,7 @@ function [features] = feature_extractor( file )
     % TODO: can it be automated?
     f = figure;
     imshow(face);
-    title('select canthus points');
+    title('select canthus and philtrum points');
     
     [xc, yc] = getpts(f);
     close(f);
@@ -38,19 +38,29 @@ function [features] = feature_extractor( file )
     % rotate canthus points
     sz = size(face) / 2;
     sz = sz';
+    
     x1 = xc(1) - sz(2);
     y1 = yc(1) - sz(1);
     x2 = xc(2) - sz(2);
     y2 = yc(2) - sz(1);
+    x3 = xc(3) - sz(2);
+    y3 = yc(3) - sz(1);
+    
     rot_mat=[cosd(angle), sind(angle); -sind(angle) ,cosd(angle)];
     old_orig1 = [x1 y1];
     old_orig2 = [x2 y2];
+    old_orig3 = [x3 y3];
+    
     new_orig1 = old_orig1 * rot_mat';
     new_orig2 = old_orig2 * rot_mat';
+    new_orig3 = old_orig3 * rot_mat';
+    
     c1(1) = new_orig1(1) + sz(2);
     c1(2) = new_orig1(2) + sz(1);
     c2(1) = new_orig2(1) + sz(2);
     c2(2) = new_orig2(2) + sz(1);
+    c3(1) = new_orig3(1) + sz(2);
+    c3(2) = new_orig3(2) + sz(1);
 
     mc = [(c1(1)+c2(1))/2, c1(2)]; %middle point of canthus
     
@@ -58,14 +68,14 @@ function [features] = feature_extractor( file )
 
     % get philtrum position
     % TODO: can it be automated?
-    f = figure;
-    imshow(face);
-    title('select philtrum point');
-    line([c1(1),c2(1)],[c1(2),c2(2)],'Marker','.')
-    
-    [c3(1), c3(2)] = getpts(f);
-%     line([mc(1),c3(1)],[mc(2),c3(2)],'Marker','.')
-    close(f);
+%     f = figure;
+%     imshow(face);
+%     title('select philtrum point');
+%     line([c1(1),c2(1)],[c1(2),c2(2)],'Marker','.')
+%     
+%     [c3(1), c3(2)] = getpts(f);
+% %     line([mc(1),c3(1)],[mc(2),c3(2)],'Marker','.')
+%     close(f);
 
     % shear the image
     dx = c3(1) - mc(1);
