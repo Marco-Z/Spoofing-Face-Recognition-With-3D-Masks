@@ -5,7 +5,7 @@ BB=step(NoseDetect,file);
 %figure,
 %imshow(file); hold on
 for i = 1:size(BB,1)
-      rectangle('Position',BB(i,:),'LineWidth',2,'LineStyle','-','EdgeColor','b');
+      %rectangle('Position',BB(i,:),'LineWidth',2,'LineStyle','-','EdgeColor','b');
       points = bbox2points(BB(i,:)) ;
      
   end
@@ -29,8 +29,8 @@ L2_y1 = points(2,2);
 L2_x2 = points(4,1);
 L2_y2 = points(4,2);
 % Plot the lines
-plot([L1_x1 L1_x2], [L1_y1 L1_y2]);
-plot([L2_x1 L2_x2], [L2_y1 L2_y2]);
+%plot([L1_x1 L1_x2], [L1_y1 L1_y2]);
+%plot([L2_x1 L2_x2], [L2_y1 L2_y2]);
 
 % Compute several intermediate quantities
 Dx12 = L1_x1-L1_x2;
@@ -54,4 +54,5 @@ P = ts(1)*[L1_x1; L1_y1] + (1-ts(1))*[L1_x2; L1_y2];
 %hold off;
 nx = P(1);
 ny = P(2);
+
 end

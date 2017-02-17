@@ -12,7 +12,7 @@ function [features] = feature_extractor( file )
     rgb = permute(rgb, [2 1 3 4]);
 
     %% take a frame
-    frame = rgb(:,:,:,61);
+    frame = rgb(:,:,:,20);
 
     %% Face detection 
     FDetect = vision.CascadeObjectDetector;
@@ -24,12 +24,23 @@ function [features] = feature_extractor( file )
     
     % get canthus points form user
     % TODO: can it be automated?
-    f = figure;
-    imshow(face);
-    title('select canthus and philtrum points');
+    %f = figure;
+    %imshow(face);
+    %title('select canthus and philtrum points');
     
-    [xc, yc] = getpts(f);
-    close(f);
+    %[xc, yc] = getpts(f);
+    [ex_R,ey_R,ex_L,ey_L] = EyesDetection(face);
+    [nx,ny] = NoseDetection(face);
+    %close(f);
+    xc = [ex_R ex_L nx];
+    yc = [ey_R ey_L ny];
+    
+    figure, imshow(face);  
+    hold on;           
+    plot(nx,ny, 'o');
+    plot(ex_R,ey_R, 'o');
+    plot(ex_L,ey_L, 'o');
+    hold off;
 
     % rotate image
     angle = rad2deg(atan((yc(2)-yc(1))/(xc(2)-xc(1))));
@@ -161,5 +172,6 @@ function [features] = feature_extractor( file )
 %     stem(features,'.');
 %     close(f);
 
+    
 end
 
