@@ -29,33 +29,32 @@ function [features] = feature_extractor( file )
     %title('select canthus and philtrum points');
     
     %[xc, yc] = getpts(f);
-    [ex_R,ey_R,ex_L,ey_L] = EyesDetection(face);
-    [nx,ny] = NoseDetection(face);
+    imwrite(face,'f.bmp');
+    %imshow(face);
+   % hold on;
+    [status,cmdout] = system('face_land.exe shape_predictor_68_face_landmarks.dat f.bmp');
+     C = textscan(cmdout,'%f,%f',3);
+     B = cell2mat(C);
+     xc = B(:,1);
+     yc = B(:,2);
+     %scatter(xc,yc);
+     %hold off;
     %close(f);
-    xc = [ex_R ex_L nx];
-    yc = [ey_R ey_L ny];
     
-    figure, imshow(face);  
-    hold on;           
-    plot(nx,ny, 'o');
-    plot(ex_R,ey_R, 'o');
-    plot(ex_L,ey_L, 'o');
-    hold off;
-
     % rotate image
-    angle = rad2deg(atan((yc(2)-yc(1))/(xc(2)-xc(1))));
+    angle = rad2deg(atan((yc(3)-yc(2))/(xc(3)-xc(2))));
     face = imrotate(face,angle,'crop');
 
     % rotate canthus points
     sz = size(face) / 2;
     sz = sz';
     
-    x1 = xc(1) - sz(2);
-    y1 = yc(1) - sz(1);
-    x2 = xc(2) - sz(2);
-    y2 = yc(2) - sz(1);
-    x3 = xc(3) - sz(2);
-    y3 = yc(3) - sz(1);
+    x1 = xc(2) - sz(2);
+    y1 = yc(2) - sz(1);
+    x2 = xc(3) - sz(2);
+    y2 = yc(3) - sz(1);
+    x3 = xc(1) - sz(2);
+    y3 = yc(1) - sz(1);
     
     rot_mat=[cosd(angle), sind(angle); -sind(angle) ,cosd(angle)];
     old_orig1 = [x1 y1];
@@ -154,10 +153,10 @@ function [features] = feature_extractor( file )
     face = imcrop(face, rect);
     
 %     close(f);
-%     f = figure;
-%     imshow(face);
-%     line([c1(1),c2(1)],[c1(2),c2(2)],'Marker','.')
-%     line([mc(1),c3(1)],[mc(2),c3(2)],'Marker','.')
+    f = figure;
+    imshow(face);
+   % line([c1(1),c2(1)],[c1(2),c2(2)],'Marker','.')
+    %line([mc(1),c3(1)],[mc(2),c3(2)],'Marker','.')
 
     %% transform face to grayscale
 
