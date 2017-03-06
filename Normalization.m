@@ -1,16 +1,5 @@
-function  [IN] = Normalization(I) 
+function  [IN] = Normalization(xc,yc,face) 
 
-for i = 1:300
-   
-    face = I(:,:,:,i) ;
-imwrite(face,'f.bmp');
-   
-    [status,cmdout] = system('face_land.exe shape_predictor_68_face_landmarks.dat f.bmp');
-     C = textscan(cmdout,'%f,%f',3); %contene the coordinates of the 3 points
-     B = cell2mat(C);
-     xc = B(:,1);
-     yc = B(:,2);
-    
     
     % rotate image
     angle = rad2deg(atan((yc(3)-yc(2))/(xc(3)-xc(2))));
@@ -90,7 +79,6 @@ imwrite(face,'f.bmp');
     rect = [xm ym 128 128];
     face = imcrop(face, rect);
     
-    IN(:,:,:,i) = face;
-end
+   IN = face; 
 
 end
