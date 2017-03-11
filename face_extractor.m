@@ -1,4 +1,4 @@
-function [out] = face_extractor( file )
+function [out] = face_extractor( file, folder )
 %extract lbp features for an image containing a face
 %   file: the location of the .hdf5 file
 
@@ -15,18 +15,12 @@ function [out] = face_extractor( file )
     frame = rgb(:,:,:,20);
 
     %% Face detection 
-    FDetect = vision.CascadeObjectDetector;
+    FDetect = vision.CascadeObjectDetector('FrontalFaceLBP');
     BB = step(FDetect,frame); %returns Bounding Box value that contains [x,y,Height,Width] of the objects of interest.
-
+   
     face=imcrop(frame,BB); % Crop the face
-    [path,name,~] = fileparts(file);
-    if strfind(path, 'fake')
-        folder = 'fake';
-    elseif strfind(path, 'real')
-        folder = 'real';
-    else
-        folder = 'undefined';
-    end
+    [~,name,~] = fileparts(file);
+ 
     out = [folder '/' name '.bmp'];
     imwrite(face,out);
 end
