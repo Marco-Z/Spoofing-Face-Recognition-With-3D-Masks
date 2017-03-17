@@ -1,12 +1,12 @@
-function [features] = feature_extractor( file, pos )
+function [features, d_features] = feature_extractor( file, pos, d )
 
     face = imread(file);
-     xc = [pos(1) pos(3) pos(5)];
-     yc = [pos(2) pos(4) pos(6)];
-     %scatter(xc,yc);
-     %hold off;
+    xc = [pos(1) pos(3) pos(5)];
+    yc = [pos(2) pos(4) pos(6)];
+    %scatter(xc,yc);
+    %hold off;
     %close(f);
-    
+
     % rotate image
     angle = rad2deg(atan((yc(3)-yc(2))/(xc(3)-xc(2))));
     face = imrotate(face,angle,'crop');
@@ -94,10 +94,23 @@ function [features] = feature_extractor( file, pos )
 
     face = rgb2gray(face);
 
+
     %% extract lbp features
 
     features = extractLBPFeatures(face);
 
-    
+    %% depth data
+    d_features = [];
+    if(d)
+        [path,name,~] = fileparts(file);
+        depth_data = [path '_d/' name '.mat'];
+        depth = load(depth_data, 'dface');
+        depth = depth.dface;
+        depth = imrotate(depth,angle,'crop');
+        depth = imwarp(depth,tform);
+        depth = imresize(depth, osize);
+        depth = imcrop(depth, rect);
+        d_features = extractLBPFeatures(depth);
+    end
 end
 

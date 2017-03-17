@@ -1,4 +1,4 @@
-function [out] = face_extractor( file, folder )
+function [out] = face_extractor( file, folder, d )
 %extract lbp features for an image containing a face
 %   file: the location of the .hdf5 file
 
@@ -23,4 +23,13 @@ function [out] = face_extractor( file, folder )
  
     out = [folder '/' name '.bmp'];
     imwrite(face,out);
+    
+    if(d)
+        depth = hdf5read(file, 'Depth_Data');
+        depth = permute(depth, [2 1 3 4]);
+        dframe = depth(:,:,:,20);
+        dface=imcrop(dframe,BB); % Crop the face
+        dout = [folder '_d/' name '.mat'];
+        save(dout,'dface');
+    end
 end
