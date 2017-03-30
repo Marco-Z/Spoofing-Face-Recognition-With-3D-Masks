@@ -1,4 +1,4 @@
-file = 'E:\Marco\drive\3DMask\train\real\01_01_01.hdf5';
+function [features] = feature_extractor_LBP_TOP( file,videoName )
 %% load the video
 rgb = hdf5read(file, 'Color_Data');
 
@@ -48,11 +48,12 @@ videoPlayer  = vision.VideoPlayer('Position',...
 oldPoints = points;
 srgb=size(rgb);
 
-fileID = fopen('f_names.txt','w');
+%fileID = fopen('f_names.txt','w');
+mkdir(videoName);
 for i = 1:srgb(4)
     % get the next frame
     videoFrame = rgb(:,:,:,i);
-
+    
     % Track the points. Note that some points may be lost.
     [points, isFound] = step(pointTracker, videoFrame);
     visiblePoints = points(isFound, :);
@@ -85,32 +86,46 @@ for i = 1:srgb(4)
         bbox = [bboxPoints(1,1), bboxPoints(1,2), bboxPoints(3,1)-bboxPoints(4,1), bboxPoints(4,2)-bboxPoints(1,2)];
         videoFrame = imcrop(videoFrame,bbox);
         videoFrame = imresize(videoFrame, [128 128]);
-        s = 'face/f';
+        
+        s = cat(2,videoName,'\Frame');
         s = strcat(s,int2str(i));
         s = strcat(s,'.bmp');
         imwrite(videoFrame,s);
-        fprintf(fileID,'%s ',s);
+        %fprintf(fileID,'%s ',s);
+         %videoFrameNorm = Normalization(videoFrame);
+         %Horizontal(i,:) = videoFrameNorm(64,:);
     end
-
-    % Display the annotated video frame using the video player object
-%     step(videoPlayer, videoFrame);
-end
-fclose(fileID);
-
-% Clean up
+     
+     
+        end
+%% Normalization and LbP_top Data
+ command = cat(2,'face_land.exe',' ','shape_predictor_68_face_landmarks.dat',' ',videoName);
+ system(command);
+ Csv_file = cat(2,videoName,'\',videoName,'.csv');
+ M = csvread(Csv_file,1,0); % matrix contains all the coordinates
+ for j=1:300
+     xc = [M(j,1) M(j,3) M(j,5)];
+     yc = [M(j,2) M(j,4) M(j,6)];
+     s = cat(2,videoName,'\Frame');
+     s = strcat(s,int2str(j));
+     s = strcat(s,'.bmp');
+     face=imread(s);
+     [IN] = Normalization(xc,yc,face);  %face normalization
+     IN = rgb2gray(IN);
+     Horizontal(j,:) = IN(64,:); %take from each frame a Horizontal line from the middle (For the LBP_top)
+     Vertical(:,j) = IN(:,64); %take from each frame a vertical line from the middle (For the LBP_top)
+     if j==150 
+         IN_middle = IN; 
+     end
+ end
+%%
+ %extract lbp_top features
+ Horizontal_features = extractLBPFeatures(Horizontal);
+ Vertical_features = extractLBPFeatures(Vertical);
+ MiddleFrame_features = extractLBPFeatures(IN_middle);
+ features = cat(2,Horizontal_features,Vertical_features,MiddleFrame_features);
+ 
+%% Clean up
 release(videoPlayer);
 release(pointTracker);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+end
