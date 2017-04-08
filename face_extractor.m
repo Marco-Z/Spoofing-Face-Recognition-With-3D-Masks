@@ -17,13 +17,27 @@ function [out] = face_extractor( file, folder, d )
     %% Face detection 
     FDetect = vision.CascadeObjectDetector('FrontalFaceLBP');
     BB = step(FDetect,frame); %returns Bounding Box value that contains [x,y,Height,Width] of the objects of interest.
-   
+    
+    if size(BB,1) > 1
+        fa = frame;
+        fa = insertShape(fa, 'Rectangle', BB);
+        fig = figure;
+        imshow(fa);
+        [x, y] = getpts;
+        close(fig);
+        for i = 1:size(BB,1)
+           if is_in_box([x,y], BB(i,:))
+               BB = BB(i,:);
+               break
+           end
+        end
+    end
     face=imcrop(frame,BB); % Crop the face
     [~,name,~] = fileparts(file);
- 
+
     out = [folder '/' name '.bmp'];
     imwrite(face,out);
-    
+
     if(d)
         depth = hdf5read(file, 'Depth_Data');
         depth = permute(depth, [2 1 3 4]);
@@ -33,3 +47,11 @@ function [out] = face_extractor( file, folder, d )
         save(dout,'dface');
     end
 end
+
+function [ in ] = is_in_box( point, box )
+    in = point(1) >= box(1) & ...
+         point(2) >= box(2) & ...
+         point(1) <= box(1) + box(3) & ...
+         point(2) <= box(2) + box(4);
+end
+
