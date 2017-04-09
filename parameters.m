@@ -1,19 +1,18 @@
 clear all; clc;
 
 %% load data
+folder = 'E:\Marco\MDS project\3DMAD\out\';
 
-load train_data
-load train_data_d
-load train_groups
-load test_data
-load test_data_d
-load test_groups
+load([folder,'train_data']);
+load([folder,'train_groups']);
+load([folder,'dev_data']);
+load([folder,'dev_groups']);
 
 %% convert data to double (libsvm takes double arrays as input)
 trg = train_groups;
 train_groups = zeros(length(train_groups),1);
-teg = test_groups;
-test_groups = zeros(length(test_groups),1);
+teg = dev_groups;
+dev_groups = zeros(length(dev_groups),1);
 
 for i = 1:(length(train_groups))
     if trg(i,:) == 'fake'
@@ -23,18 +22,18 @@ for i = 1:(length(train_groups))
     end
 end
 
-for i = 1:(length(test_groups))
+for i = 1:(length(dev_groups))
     if teg(i,:) == 'fake'
-        test_groups(i) = 0;
+        dev_groups(i) = 0;
     else
-        test_groups(i) = 1;
+        dev_groups(i) = 1;
     end
 end
 
 train_features = double(train_features);
-test_features = double(test_features);
-d_train_features = double(d_train_features);
-d_test_features = double(d_test_features);
+dev_features = double(dev_features);
+% d_train_features = double(d_train_features);
+% d_test_features = double(d_test_features);
 
 %%
 
