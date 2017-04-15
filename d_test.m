@@ -11,7 +11,7 @@ load([folder,'test_groups']);
 train_features = train_d_features;
 test_features   = test_d_features;
 
-C     = 8192;
+C     = 32768;
 gamma = 2;
 
 %% convert data to double (libsvm takes double arrays as input)
@@ -50,8 +50,13 @@ model = svmtrain(train_groups, train_features,sprintf('-c %f -g %f -b 1', C, gam
 
 %%
 
-[X,Y] = perfcurve(test_groups,probs(:,2),1);
-plot(X,Y);
+[X,Y,t] = perfcurve(test_groups,probs(:,2),1);
+figure;
+plot(X,Y)
+xlabel('False positive rate')
+ylabel('True positive rate')
+title('ROC for Classification with LBP on depth data')
+
 
 
 

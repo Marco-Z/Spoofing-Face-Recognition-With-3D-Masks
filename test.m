@@ -8,9 +8,8 @@ load([folder,'train_groups']);
 load([folder,'test_data']);
 load([folder,'test_groups']);
 
-C     = 8;
-gamma = 8;
-
+C     = 2048;
+gamma = 0.0078125;
 
 %% convert data to double (libsvm takes double arrays as input)
 trg = train_groups;
@@ -50,7 +49,10 @@ model = svmtrain(train_groups, train_features,sprintf('-c %f -g %f -b 1', C, gam
 
 [X,Y,t] = perfcurve(test_groups,probs(:,2),1);
 figure;
-plot(X,Y);
+plot(X,Y)
+xlabel('False positive rate')
+ylabel('True positive rate')
+title('ROC for Classification with LBP on RGB data')
 
 
 

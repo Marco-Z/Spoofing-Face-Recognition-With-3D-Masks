@@ -8,7 +8,7 @@ load([folder,'train_groups']);
 load([folder,'test_data']);
 load([folder,'test_groups']);
 
-C     = 2;
+C     = 8;
 gamma = 0.5;
 
 
@@ -50,10 +50,10 @@ model = svmtrain(train_groups, train_features,sprintf('-c %f -g %f -b 1', C, gam
 
 [X,Y,t] = perfcurve(test_groups,probs(:,2),1);
 figure;
-plot(X,Y);
-
-f = [X,Y,t];
-
+plot(X,Y)
+xlabel('False positive rate')
+ylabel('True positive rate')
+title('ROC for Classification with LBP TOP')
 
 
 
