@@ -1,12 +1,14 @@
-function [features] = feature_extractor_LBP_TOP( file,videoName )
+function [features] = feature_extractor_LBP_TOP( file, out )
+
+mkdir(out);
 %% load the video
 rgb = hdf5read(file, 'Color_Data');
 
 %% rotate the video
 rgb = permute(rgb, [2 1 3 4]);
-    
+
     % Create a cascade detector object.
-faceDetector = vision.CascadeObjectDetector();
+faceDetector = vision.CascadeObjectDetector('UpperBody');
 
 % Read a video frame and run the face detector.
 videoFrame = rgb(:,:,:,1);
@@ -16,13 +18,33 @@ bbox       = step(faceDetector, videoFrame);
 videoFrame = insertShape(videoFrame, 'Rectangle', bbox);
 % figure; imshow(videoFrame); title('Detected face');
 
+%%
+
+if size(bbox,1) > 1
+        disp('error');
+        fa = videoFrame;
+        fa = insertShape(fa, 'Rectangle', bbox);
+        fig = figure;
+        imshow(fa);
+        [x, y] = getpts;
+        close(fig);
+        for i = 1:size(bbox,1)
+           if is_in_box([x,y], bbox(i,:))
+               bbox = bbox(i,:);
+               break
+           end
+        end
+end
+    
 % Convert the first box into a list of 4 points
 % This is needed to be able to visualize the rotation of the object.
 bboxPoints = bbox2points(bbox(1, :));
 
 %%
 % Detect feature points in the face region.
+
 points = detectMinEigenFeatures(rgb2gray(videoFrame), 'ROI', bbox);
+
 
 % Display the detected points.
 % figure, imshow(videoFrame), hold on, title('Detected features');
@@ -39,8 +61,8 @@ points = points.Location;
 initialize(pointTracker, points, videoFrame);
 
 %%
-videoPlayer  = vision.VideoPlayer('Position',...
-    [100 100 [size(videoFrame, 2), size(videoFrame, 1)]+30]);
+% videoPlayer  = vision.VideoPlayer('Position',...
+%     [100 100 [size(videoFrame, 2), size(videoFrame, 1)]+30]);
 
 %%
 % Make a copy of the points to be used for computing the geometric
@@ -49,11 +71,12 @@ oldPoints = points;
 srgb=size(rgb);
 
 %fileID = fopen('f_names.txt','w');
-mkdir(videoName);
+
+[~,videoName,~] = fileparts(file);
 for i = 1:srgb(4)
     % get the next frame
     videoFrame = rgb(:,:,:,i);
-    
+
     % Track the points. Note that some points may be lost.
     [points, isFound] = step(pointTracker, videoFrame);
     visiblePoints = points(isFound, :);
@@ -63,7 +86,7 @@ for i = 1:srgb(4)
 
         % Estimate the geometric transformation between the old points
         % and the new points and eliminate outliers
-        [xform, oldInliers, visiblePoints] = estimateGeometricTransform(...
+        [xform, ~, visiblePoints] = estimateGeometricTransform(...
             oldInliers, visiblePoints, 'similarity', 'MaxDistance', 4);
 
         % Apply the transformation to the bounding box points
@@ -86,32 +109,35 @@ for i = 1:srgb(4)
         bbox = [bboxPoints(1,1), bboxPoints(1,2), bboxPoints(3,1)-bboxPoints(4,1), bboxPoints(4,2)-bboxPoints(1,2)];
         videoFrame = imcrop(videoFrame,bbox);
         videoFrame = imresize(videoFrame, [128 128]);
-        
-        s = cat(2,videoName,'\Frame');
+
+        s = cat(2,out,'\Frame');
         s = strcat(s,int2str(i));
         s = strcat(s,'.bmp');
         imwrite(videoFrame,s);
-        %fprintf(fileID,'%s ',s);
-         %videoFrameNorm = Normalization(videoFrame);
-         %Horizontal(i,:) = videoFrameNorm(64,:);
+
     end
-     
-     
-        end
+
+
+end
 %% Normalization and LbP_top Data
- command = cat(2,'face_land.exe',' ','shape_predictor_68_face_landmarks.dat',' ',videoName);
+ command = ['face_land.exe shape_predictor_68_face_landmarks.dat "',out,'"'];
  system(command);
- Csv_file = cat(2,videoName,'\',videoName,'.csv');
+
+%%
+release(pointTracker);
+ %%
+ Csv_file = cat(2,out,'\data.csv');
  M = csvread(Csv_file,1,0); % matrix contains all the coordinates
  for j=1:300
      xc = [M(j,1) M(j,3) M(j,5)];
      yc = [M(j,2) M(j,4) M(j,6)];
-     s = cat(2,videoName,'\Frame');
+     s = cat(2,out,'\Frame');
      s = strcat(s,int2str(j));
      s = strcat(s,'.bmp');
      face=imread(s);
      [IN] = Normalization(xc,yc,face);  %face normalization
      IN = rgb2gray(IN);
+%      IN = imresize(IN, [128 128]);
      Horizontal(j,:) = IN(64,:); %take from each frame a Horizontal line from the middle (For the LBP_top)
      Vertical(:,j) = IN(:,64); %take from each frame a vertical line from the middle (For the LBP_top)
      if j==150 
@@ -125,7 +151,4 @@ for i = 1:srgb(4)
  MiddleFrame_features = extractLBPFeatures(IN_middle);
  features = cat(2,Horizontal_features,Vertical_features,MiddleFrame_features);
  
-%% Clean up
-release(videoPlayer);
-release(pointTracker);
 end
