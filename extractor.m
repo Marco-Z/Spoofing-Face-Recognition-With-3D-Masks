@@ -17,13 +17,8 @@ for i=1:size(fs,1)
     f = ls([in,'*.hdf5']);
 
     for j=1:size(f,1)
-        try
-            disp(f(j,:))
-            face_extractor([in,f(j,:)], out, false);
-        catch e
-            disp(e.message);
-            disp(['error: ',f(j,:)]);
-        end
+        disp(f(j,:))
+        face_extractor([in,f(j,:)], out, true);
     end;
 
 end

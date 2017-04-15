@@ -3,14 +3,16 @@ clear all; clc;
 %% load data
 folder = 'E:\Marco\MDS project\3DMAD\out\';
 
-load([folder,'train_data']);
+load([folder,'train_data_d']);
 load([folder,'train_groups']);
-load([folder,'test_data']);
+load([folder,'test_data_d']);
 load([folder,'test_groups']);
 
-C     = 8;
-gamma = 8;
+train_features = train_d_features;
+test_features   = test_d_features;
 
+C     = 8192;
+gamma = 2;
 
 %% convert data to double (libsvm takes double arrays as input)
 trg = train_groups;
@@ -48,8 +50,7 @@ model = svmtrain(train_groups, train_features,sprintf('-c %f -g %f -b 1', C, gam
 
 %%
 
-[X,Y,t] = perfcurve(test_groups,probs(:,2),1);
-figure;
+[X,Y] = perfcurve(test_groups,probs(:,2),1);
 plot(X,Y);
 
 

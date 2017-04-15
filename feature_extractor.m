@@ -103,7 +103,7 @@ function [features, d_features] = feature_extractor( file, pos, d )
     d_features = [];
     if(d)
         [path,name,~] = fileparts(file);
-        depth_data = [path '_d/' name '.mat'];
+        depth_data = [path '\_d\' name '.mat'];
         depth = load(depth_data, 'dface');
         depth = depth.dface;
         depth = imrotate(depth,angle,'crop');

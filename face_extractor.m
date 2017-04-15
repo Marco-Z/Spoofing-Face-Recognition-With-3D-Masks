@@ -19,6 +19,7 @@ function [out] = face_extractor( file, folder, d )
     BB = step(FDetect,frame); %returns Bounding Box value that contains [x,y,Height,Width] of the objects of interest.
     
     if size(BB,1) > 1
+        disp('error');
         fa = frame;
         fa = insertShape(fa, 'Rectangle', BB);
         fig = figure;
@@ -47,11 +48,3 @@ function [out] = face_extractor( file, folder, d )
         save(dout,'dface');
     end
 end
-
-function [ in ] = is_in_box( point, box )
-    in = point(1) >= box(1) & ...
-         point(2) >= box(2) & ...
-         point(1) <= box(1) + box(3) & ...
-         point(2) <= box(2) + box(4);
-end
-

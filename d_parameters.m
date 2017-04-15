@@ -3,10 +3,13 @@ clear all; clc;
 %% load data
 folder = 'E:\Marco\MDS project\3DMAD\out\';
 
-load([folder,'train_data']);
+load([folder,'train_data_d']);
 load([folder,'train_groups']);
-load([folder,'dev_data']);
+load([folder,'dev_data_d']);
 load([folder,'dev_groups']);
+
+train_features = train_d_features;
+dev_features   = dev_d_features;
 
 %% convert data to double (libsvm takes double arrays as input)
 trg = train_groups;
@@ -57,4 +60,3 @@ hold off
 xlabel('log_2(C)'), ylabel('log_2(\gamma)'), title('Cross-Validation Accuracy') 
 %# now you can train you model using best_C and best_gamma
 best_C = 2^C(idx); best_gamma = 2^gamma(idx); %# ...
-

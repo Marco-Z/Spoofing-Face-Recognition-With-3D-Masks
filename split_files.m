@@ -16,13 +16,19 @@ folder = 'E:\Marco\MDS project\3DMAD\';
 % `-- out
 %     |-- train
 %     |   |-- real
+%     |   |   `-- _d
 %     |   `-- fake
+%     |       `-- _d
 %     |-- dev
 %     |   |-- real
+%     |   |   `-- _d
 %     |   `-- fake
+%     |       `-- _d
 %     `-- test
 %         |-- real
+%         |   `-- _d
 %         `-- fake
+%             `-- _d
 
 %crete output folders
 warning('off');
@@ -49,6 +55,13 @@ mkdir([folder,'out\dev\fake\']);
 mkdir([folder,'out\dev\real\']);
 mkdir([folder,'out\test\fake\']);
 mkdir([folder,'out\test\real\']);
+
+mkdir([folder,'out\train\fake\_d\']);
+mkdir([folder,'out\train\real\_d\']);
+mkdir([folder,'out\dev\fake\_d\']);
+mkdir([folder,'out\dev\real\_d\']);
+mkdir([folder,'out\test\fake\_d\']);
+mkdir([folder,'out\test\real\_d\']);
 
 warning('on');
 
