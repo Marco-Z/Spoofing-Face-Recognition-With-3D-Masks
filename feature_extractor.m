@@ -1,46 +1,12 @@
-function [features] = feature_extractor( file )
-%extract lbp features for an image containing a face
-%   file: the location of the .hdf5 file
+function [features, d_features] = feature_extractor( file, pos, d )
 
-%   data: the cumulative features vector with the previous features
-%   groups: the cumulative classification vector with the previous groups
-
-    %% load the video
-    rgb = hdf5read(file, 'Color_Data');
-
-    %% rotate the video
-    rgb = permute(rgb, [2 1 3 4]);
-
-    %% take a frame
-    frame = rgb(:,:,:,20);
-
-    %% Face detection 
-    FDetect = vision.CascadeObjectDetector;
-    BB = step(FDetect,frame); %returns Bounding Box value that contains [x,y,Height,Width] of the objects of interest.
-
-    face=imcrop(frame,BB); % Crop the face
-
-    %% canthus rotation
-    
-    % get canthus points form user
-    % TODO: can it be automated?
-    %f = figure;
-    %imshow(face);
-    %title('select canthus and philtrum points');
-    
-    %[xc, yc] = getpts(f);
-    imwrite(face,'f.bmp');
-    %imshow(face);
-   % hold on;
-    [status,cmdout] = system('face_land.exe shape_predictor_68_face_landmarks.dat f.bmp');
-     C = textscan(cmdout,'%f,%f',3);
-     B = cell2mat(C);
-     xc = B(:,1);
-     yc = B(:,2);
-     %scatter(xc,yc);
-     %hold off;
+    face = imread(file);
+    xc = [pos(1) pos(3) pos(5)];
+    yc = [pos(2) pos(4) pos(6)];
+    %scatter(xc,yc);
+    %hold off;
     %close(f);
-    
+
     % rotate image
     angle = rad2deg(atan((yc(3)-yc(2))/(xc(3)-xc(2))));
     face = imrotate(face,angle,'crop');
@@ -76,17 +42,6 @@ function [features] = feature_extractor( file )
     
     %% philtrum shear
 
-    % get philtrum position
-    % TODO: can it be automated?
-%     f = figure;
-%     imshow(face);
-%     title('select philtrum point');
-%     line([c1(1),c2(1)],[c1(2),c2(2)],'Marker','.')
-%     
-%     [c3(1), c3(2)] = getpts(f);
-% %     line([mc(1),c3(1)],[mc(2),c3(2)],'Marker','.')
-%     close(f);
-
     % shear the image
     dx = c3(1) - mc(1);
     shear = -2*dx/sz(1);
@@ -110,11 +65,6 @@ function [features] = feature_extractor( file )
     
     face = imwarp(face,tform);
 
-    
-%     f = figure;
-%     imshow(face);
-%     line([c1(1),c2(1)],[c1(2),c2(2)],'Marker','.')
-%     line([mc(1),c3(1)],[mc(2),c3(2)],'Marker','.')
 
     %% resize image
 
@@ -124,53 +74,43 @@ function [features] = feature_extractor( file )
 
     % transform points to new scale
     c1 = c1 .* [rx ry];
-%     c2 = c2 .* [rx ry];
-%     mc = mc .* [rx ry];
-%     c3 = c3 .* [rx ry];
 
     % resize image
     dim = size(face);
     osize = [ry rx] .* dim(1:end-1);
     face = imresize(face, osize);
-    
-%     line([c1(1),c2(1)],[c1(2),c2(2)],'Marker','.')
-%     line([mc(1),c3(1)],[mc(2),c3(2)],'Marker','.')
-
+ 
     %% crop the image
 
     % shift to predefined position
     xm = c1(1) - 40;
     ym = c1(2) - 48;
 
-    % transform the points to new space
-%     c1 = c1 - [xm ym];
-%     c2 = c2 - [xm ym];
-%     mc = mc - [xm ym];
-%     c3 = c3 - [xm ym];
-    
     % crop to 128x128
     rect = [xm ym 128 128];
     face = imcrop(face, rect);
     
-%     close(f);
-    f = figure;
-    imshow(face);
-   % line([c1(1),c2(1)],[c1(2),c2(2)],'Marker','.')
-    %line([mc(1),c3(1)],[mc(2),c3(2)],'Marker','.')
-
     %% transform face to grayscale
 
-%     close(f);
     face = rgb2gray(face);
+
 
     %% extract lbp features
 
     features = extractLBPFeatures(face);
-    
-%     f=figure;
-%     stem(features,'.');
-%     close(f);
 
-    
+    %% depth data
+    d_features = [];
+    if(d)
+        [path,name,~] = fileparts(file);
+        depth_data = [path '\_d\' name '.mat'];
+        depth = load(depth_data, 'dface');
+        depth = depth.dface;
+        depth = imrotate(depth,angle,'crop');
+        depth = imwarp(depth,tform);
+        depth = imresize(depth, osize);
+        depth = imcrop(depth, rect);
+        d_features = extractLBPFeatures(depth);
+    end
 end
 
