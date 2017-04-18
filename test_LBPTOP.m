@@ -48,12 +48,14 @@ model = svmtrain(train_groups, train_features,sprintf('-c %f -g %f -b 1', C, gam
 
 %%
 
-[X,Y,t] = perfcurve(test_groups,probs(:,2),1);
-figure;
-plot(X,Y)
+[X,Y,t,~,opt] = perfcurve(test_groups,probs(:,2),1);
+hFig = figure(1);
+set(hFig, 'Position', [400 400 300 300]);
+plot(X,Y,'LineWidth',2)
 xlabel('False positive rate')
 ylabel('True positive rate')
-title('ROC for Classification with LBP TOP')
+pbaspect([1 1 1])
+% title('ROC for Classification with LBP TOP')
 
 
 
