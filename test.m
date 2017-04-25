@@ -8,8 +8,8 @@ load([folder,'train_groups']);
 load([folder,'test_data']);
 load([folder,'test_groups']);
 
-C     = 2048;
-gamma = 0.0078125;
+C     = 64;
+gamma = 1;
 
 %% convert data to double (libsvm takes double arrays as input)
 trg = train_groups;

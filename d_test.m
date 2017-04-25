@@ -9,10 +9,10 @@ load([folder,'test_data_d']);
 load([folder,'test_groups']);
 
 train_features = train_d_features;
-test_features   = test_d_features;
+test_features  = test_d_features;
 
-C     = 32768;
-gamma = 2;
+C     = 256;
+gamma = 4096;
 
 %% convert data to double (libsvm takes double arrays as input)
 trg = train_groups;
