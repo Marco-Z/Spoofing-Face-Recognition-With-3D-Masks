@@ -351,7 +351,7 @@ def find_parameters(dataset_pathname, options=''):
 			stdout_str += 'g={0}, '.format(2.0**best_g)
 			output_str += 'log2g={0} '.format(g)
 		stdout_str += 'rate={0})'.format(best_rate)
-		print(stdout_str)
+		# print(stdout_str)
 		if options.out_pathname and not resumed:
 			output_str += 'rate={0}\n'.format(rate)
 			result_file.write(output_str)
